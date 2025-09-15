@@ -1,0 +1,20 @@
+services:
+  bot:
+    build: .
+    container_name: thecomrademajor_bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - PYTHONUNBUFFERED=1
+    volumes:
+      # Монтируем логи для доступа с хоста
+      - ./logs:/app/logs
+    
+    # Проверка здоровья контейнера
+    healthcheck:
+      test: ["CMD", "python", "-c", "import sys; sys.exit(0)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

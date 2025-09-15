@@ -1,0 +1,52 @@
+version: '3'
+
+tasks:
+  install:
+    desc: Install dependencies
+    cmds:
+      - poetry install
+
+  run:
+    desc: Run the bot
+    cmds:
+      - poetry run python -m src.main
+
+  check:
+    desc: Run all checks (lint, type check, format)
+    cmds:
+      - task: lint
+      - task: type-check
+      - task: format-check
+
+  lint:
+    desc: Run linting
+    cmds:
+      - poetry run flake8 src/
+
+  type-check:
+    desc: Run type checking
+    cmds:
+      - poetry run mypy src/
+
+  format:
+    desc: Format code
+    cmds:
+      - poetry run black src/
+      - poetry run isort src/
+
+  format-check:
+    desc: Check code formatting
+    cmds:
+      - poetry run black --check src/
+      - poetry run isort --check-only src/
+
+  test:
+    desc: Run tests
+    cmds:
+      - poetry run pytest
+
+  dev:
+    desc: Run bot in development mode
+    deps: [install]
+    cmds:
+      - task: run
