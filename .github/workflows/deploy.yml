@@ -1,0 +1,42 @@
+name: Deploy to VDS
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Deploy to VDS
+      uses: appleboy/ssh-action@v0.1.8
+      with:
+        host: ${{ secrets.VDS_HOST }}
+        username: ${{ secrets.VDS_USER }}
+        key: ${{ secrets.VDS_SSH_KEY }}
+        script: |
+          cd /root/thecomrademajor_bot
+          
+          # Остановка сервиса
+          sudo systemctl stop thecomrademajor-bot
+          
+          # Обновление кода
+          git pull origin main
+          
+          # Обновление зависимостей
+          poetry install --only=main
+          
+          # Запуск сервиса
+          sudo systemctl start thecomrademajor-bot
+          
+          # Проверка статуса
+          sleep 3
+          if sudo systemctl is-active --quiet thecomrademajor-bot; then
+            echo "Bot service started successfully"
+            sudo systemctl status thecomrademajor-bot --no-pager
+          else
+            echo "Failed to start bot service"
+            sudo journalctl -u thecomrademajor-bot --no-pager -n 20
+            exit 1
+          fi
